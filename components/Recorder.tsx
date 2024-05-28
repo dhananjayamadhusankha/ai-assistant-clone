@@ -3,11 +3,18 @@
 import activeAssistantIcon from "@/img/active.gif";
 import notActiveAssistantIcon from "@/img/notactive.png";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
+
+export const mimeType = "audio/webm";
 
 function Recorder({ uploadAudio }: { uploadAudio: (blob: Blob) => void }) {
+  const { pending } = useFormStatus();
   const [permission, setPermission] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const [recordingStatus, setRecordingStatus] = useState("inactive");
+  const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
 
   useEffect(() => {
     getMicrophonePermission();
@@ -30,15 +37,52 @@ function Recorder({ uploadAudio }: { uploadAudio: (blob: Blob) => void }) {
       }
     }
   };
+
+  const startRecording = async () => {
+    if (stream === null || mediaRecorder === null) return;
+
+    if (pending) return;
+    setRecordingStatus("recording");
+
+    // create new media recorder instance using the stream
+    const media = new MediaRecorder(stream, { mimeType });
+    mediaRecorder.current = media;
+    mediaRecorder.current.start();
+
+    let localAudioChunks: Blob[] = [];
+    mediaRecorder.current.ondataavailable = (event) => {
+      if (typeof event.data === "undefined") return;
+      if (event.data.size === 0) return;
+
+      localAudioChunks.push(event.data);
+    };
+    setAudioChunks(localAudioChunks);
+  };
+
   return (
     <div className="flex items-center text-white justify-center">
-      <Image
-        src={activeAssistantIcon}
-        width={350}
-        height={350}
-        alt="Recording"
-        priority
-      />
+      {!permission && (
+        <button onClick={getMicrophonePermission}>Get Permission</button>
+      )}
+
+      {pending && (
+        <Image
+          src={activeAssistantIcon}
+          alt="Recording"
+          priority
+          className="assistant grayscale"
+        />
+      )}
+
+      {permission && recordingStatus === "inactive" && !pending && (
+        <Image
+          src={notActiveAssistantIcon}
+          alt="Not Recording"
+          priority={true}
+          onClick={startRecording}
+          className="assistant cursor-pointer hover:scale-110 transition-all duration-150 ease-in-out"
+        />
+      )}
     </div>
   );
 }
