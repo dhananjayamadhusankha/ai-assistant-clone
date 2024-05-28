@@ -39,7 +39,7 @@ function Recorder({ uploadAudio }: { uploadAudio: (blob: Blob) => void }) {
   };
 
   const startRecording = async () => {
-    if (stream === null || mediaRecorder === null) return;
+    if (stream === null) return;
 
     if (pending) return;
     setRecordingStatus("recording");
@@ -57,6 +57,18 @@ function Recorder({ uploadAudio }: { uploadAudio: (blob: Blob) => void }) {
       localAudioChunks.push(event.data);
     };
     setAudioChunks(localAudioChunks);
+  };
+
+  const stopRecording = async () => {
+    if (mediaRecorder.current === null || pending) return;
+
+    setRecordingStatus("inactive");
+    mediaRecorder.current.stop();
+    mediaRecorder.current.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: mimeType });
+      uploadAudio(audioBlob);
+      setAudioChunks([]);
+    };
   };
 
   return (
@@ -80,6 +92,16 @@ function Recorder({ uploadAudio }: { uploadAudio: (blob: Blob) => void }) {
           alt="Not Recording"
           priority={true}
           onClick={startRecording}
+          className="assistant cursor-pointer hover:scale-110 transition-all duration-150 ease-in-out"
+        />
+      )}
+
+      {recordingStatus === "recording" && (
+        <Image
+          src={activeAssistantIcon}
+          alt="Recording"
+          priority={true}
+          onClick={stopRecording}
           className="assistant cursor-pointer hover:scale-110 transition-all duration-150 ease-in-out"
         />
       )}
