@@ -1,8 +1,32 @@
+"use client";
+
 import Messages from "@/components/Messages";
+import Recorder from "@/components/Recorder";
 import { SettingsIcon } from "lucide-react";
 import Image from "next/image";
+import { useRef } from "react";
 
 export default function Home() {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const uploadAudio = (blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+
+    const file = new File([blob], "audio/webm", { type: blob.type });
+
+    // set the file as the value of the hidden file input field
+    if (inputRef.current) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      inputRef.current.files = dataTransfer.files;
+    }
+
+    // simulate a click & submit the form
+    if (submitButtonRef.current) {
+      submitButtonRef.current.click();
+    }
+  };
   return (
     <main className="bg-purple-500 h-screen overflow-y-auto">
       {/* header */}
@@ -29,13 +53,16 @@ export default function Home() {
           <Messages />
         </div>
 
-         {/* hidden fields */}
-         <input type="file" />
+        {/* hidden fields */}
+        <input type="file" name='audio' hidden ref={inputRef} />
+        <button type="submit" hidden ref={submitButtonRef} />
 
-         <div className="fixed bottom-0 w-full bg-black overflow-hidden text-white rounded-t-3xl">
+        <div className="fixed bottom-0 w-full bg-black overflow-hidden text-white rounded-t-3xl">
           {/* recorder */}
-          {/* Voice sysnthesis - output of the assistent voice */}
-         </div>
+          <Recorder uploadAudio={uploadAudio} />
+
+          <div>{/* Voice sysnthesis - output of the assistent voice */}</div>
+        </div>
       </form>
     </main>
   );
