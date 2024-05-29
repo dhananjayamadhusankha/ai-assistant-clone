@@ -5,19 +5,41 @@ import Messages from "@/components/Messages";
 import Recorder, { mimeType } from "@/components/Recorder";
 import { SettingsIcon } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormState } from "react-dom";
 
 const initialState = {
   sender: "",
-  responce: "",
+  response: "",
   id: "",
+};
+
+export type Message = {
+  sender: string;
+  response: string;
+  id: string;
 };
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [action, formAction] = useFormState(transcript, initialState);
+  const [state, formAction] = useFormState(transcript, initialState);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    if (state.response && state.sender) {
+      setMessages((messages) => [
+        {
+          sender: state.sender || "",
+          response: state.response || "",
+          id: state.id || "",
+        },
+        ...messages,
+      ]);
+    }
+  }, [state]);
+
+  console.log("messages >>>", messages)
 
   const uploadAudio = (blob: Blob) => {
     const file = new File([blob], "audio/webm", { type: mimeType });
@@ -57,7 +79,7 @@ export default function Home() {
       <form action={formAction} className="flex flex-col bg-black">
         {/* Messages */}
         <div className="flex-1 bg-gradient-to-b from-purple-500 to-black">
-          <Messages />
+          <Messages messages={messages} />
         </div>
 
         {/* hidden fields */}
