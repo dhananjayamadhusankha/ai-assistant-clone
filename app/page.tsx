@@ -1,18 +1,47 @@
 "use client";
 
+import transcript from "@/actions/transcript";
 import Messages from "@/components/Messages";
 import Recorder, { mimeType } from "@/components/Recorder";
 import { SettingsIcon } from "lucide-react";
 import Image from "next/image";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFormState } from "react-dom";
+
+const initialState = {
+  sender: "",
+  response: "",
+  id: "",
+};
+
+export type Message = {
+  sender: string;
+  response: string;
+  id: string;
+};
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [state, formAction] = useFormState(transcript, initialState);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  useEffect(() => {
+    if (state.response && state.sender) {
+      setMessages((messages) => [
+        {
+          sender: state.sender || "",
+          response: state.response || "",
+          id: state.id || "",
+        },
+        ...messages,
+      ]);
+    }
+  }, [state]);
+
+  console.log("messages >>>", messages)
 
   const uploadAudio = (blob: Blob) => {
-    const url = URL.createObjectURL(blob);
-
     const file = new File([blob], "audio/webm", { type: mimeType });
 
     // set the file as the value of the hidden file input field
@@ -47,14 +76,14 @@ export default function Home() {
 
       {/* form */}
 
-      <form className="flex flex-col bg-black">
+      <form action={formAction} className="flex flex-col bg-black">
         {/* Messages */}
         <div className="flex-1 bg-gradient-to-b from-purple-500 to-black">
-          <Messages />
+          <Messages messages={messages} />
         </div>
 
         {/* hidden fields */}
-        <input type="file" name='audio' hidden ref={inputRef} />
+        <input type="file" name="audio" hidden ref={inputRef} />
         <button type="submit" hidden ref={submitButtonRef} />
 
         <div className="fixed bottom-0 w-full bg-black overflow-hidden text-white rounded-t-3xl">
