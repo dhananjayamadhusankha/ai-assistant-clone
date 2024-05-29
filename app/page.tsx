@@ -3,6 +3,7 @@
 import transcript from "@/actions/transcript";
 import Messages from "@/components/Messages";
 import Recorder, { mimeType } from "@/components/Recorder";
+import VoiceSynthesizer from "@/components/VoiceSynthesizer";
 import { SettingsIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -25,6 +26,7 @@ export default function Home() {
   const submitButtonRef = useRef<HTMLButtonElement | null>(null);
   const [state, formAction] = useFormState(transcript, initialState);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [displaySettings, setDisplaySettings] = useState(false);
 
   useEffect(() => {
     if (state.response && state.sender) {
@@ -39,7 +41,7 @@ export default function Home() {
     }
   }, [state]);
 
-  console.log("messages >>>", messages)
+  console.log("messages >>>", messages);
 
   const uploadAudio = (blob: Blob) => {
     const file = new File([blob], "audio/webm", { type: mimeType });
@@ -70,6 +72,7 @@ export default function Home() {
 
         <SettingsIcon
           size={40}
+          onClick={() => setDisplaySettings(!displaySettings)}
           className="rounded-full cursor-pointer bg-purple-600 p-2 text-black transition-all ease-in-out duration-150 hover:bg-purple-700 hover:text-white"
         />
       </header>
@@ -90,7 +93,10 @@ export default function Home() {
           {/* recorder */}
           <Recorder uploadAudio={uploadAudio} />
 
-          <div>{/* Voice sysnthesis - output of the assistent voice */}</div>
+          {/* Voice sysnthesis - output of the assistent voice */}
+          <div>
+            <VoiceSynthesizer state={state} displaySettings={displaySettings} />
+          </div>
         </div>
       </form>
     </main>
