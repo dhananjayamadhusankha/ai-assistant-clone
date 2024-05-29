@@ -1,5 +1,6 @@
 import { Message } from "@/app/page";
 import { ChevronDownCircle } from "lucide-react";
+import LoadingMessage from "./LoadingMessage";
 
 type Props = {
   messages: Message[];
@@ -12,6 +13,7 @@ function Messages({ messages }: Props) {
         messages.length > 0 ? "pb-96" : "pb-52"
       }`}
     >
+      <LoadingMessage />
       {!messages.length && (
         <div className="flex flex-col flex-1 justify-end items-center text-gray-500 space-y-10">
           <p className=" animate-pulse">Start a Convercation</p>
@@ -23,14 +25,14 @@ function Messages({ messages }: Props) {
         {messages.map((message) => (
           <div key={message.id} className=" space-y-5">
             {/* sender */}
-            <div className="pl-40">
-              <p className="message text-left ml-auto rounded-br-none">
+            <div className="pl-10 md:pl-40">
+              <p className="message text-left rounded-xl ml-auto rounded-br-none shadow-sm">
                 {message.sender}
               </p>
             </div>
             {/* reciever */}
-            <div className="pr-40">
-              <p className="message bg-gray-800 rounded-bl-none">
+            <div className="pr-10 md:pr-40">
+              <p className="message bg-gray-800 rounded-xl rounded-bl-none shadow-sm">
                 {message.response}
               </p>
             </div>
