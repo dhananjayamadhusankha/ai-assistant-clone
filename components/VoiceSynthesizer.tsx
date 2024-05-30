@@ -37,7 +37,7 @@ function VoiceSynthesizer({
     return () => {
       synth.cancel();
     };
-  }, [state]);
+  }, [state, voice, pitch, rate, volume]);
 
   const handleVoiceChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const voices = window.speechSynthesis.getVoices();

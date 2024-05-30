@@ -3,7 +3,8 @@
 import {
   OpenAIClient,
   AzureKeyCredential,
-  ChatRequestMessage,
+  ChatRequestSystemMessage,
+  ChatRequestUserMessage,
 } from "@azure/openai";
 
 async function transcript(prevState: any, formData: FormData) {
@@ -54,17 +55,17 @@ async function transcript(prevState: any, formData: FormData) {
   console.log(`Transcription: ${result.text}`);
 
   //   --- get the completions from Azure OpenAI ---
-  const messages: ChatRequestMessage[] = [
-    {
-      role: "system",
-      content:
-        "You are a helpful assistent. You will answer the quesions and reply I cannot answer that if you dont know the answer",
-    },
-    {
-      role: "user",
-      content: result.text,
-    },
-  ];
+  const systemMessage: ChatRequestSystemMessage = {
+    role: "system",
+    content: "You are a helpful assistant. You will answer the questions and reply 'I cannot answer that' if you don't know the answer."
+  };
+
+  const userMessage: ChatRequestUserMessage = {
+    role: "user",
+    content: result.text
+  };
+
+  const messages = [systemMessage, userMessage];
 
   console.log(
     `Messages >>>: ${messages.map((message) => message.content).join("\n")}`
