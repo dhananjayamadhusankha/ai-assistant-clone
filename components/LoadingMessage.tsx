@@ -8,7 +8,7 @@ function LoadingMessage() {
   return (
     pending && (
       <div className="text-center">
-        <BeatLoader />
+        <BeatLoader color="white" />
       </div>
     )
   );
